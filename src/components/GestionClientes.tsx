@@ -5,37 +5,58 @@ import styled from 'styled-components';
 import { FaEdit, FaTrash, FaUserPlus } from 'react-icons/fa';
 
 const Container = styled.div`
-  max-width: 800px;
-  margin: 0 auto;
+  max-width: 600px;
+  margin: 50px auto;
   padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  text-align: center;
 `;
 
 const Title = styled.h1`
   color: var(--color-dark-blue);
-  text-align: center;
   margin-bottom: 30px;
+  font-family: 'Arial', sans-serif;
+  font-weight: bold;
+  text-transform: uppercase;
 `;
 
 const Form = styled.form`
   display: flex;
   flex-direction: column;
-  margin-bottom: 20px;
+  align-items: center;
+  margin-bottom: 30px;
 `;
 
 const Input = styled.input`
   margin-bottom: 15px;
-  padding: 10px;
+  padding: 12px;
+  width: 100%;
+  max-width: 400px;
   border: 1px solid var(--color-dark-blue);
-  border-radius: 5px;
+  border-radius: 8px;
+  font-size: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+
+  &:focus {
+    outline: none;
+    border-color: #3498db;
+  }
 `;
 
 const Button = styled.button`
   background-color: var(--color-dark-blue);
-  color: var(--color-cream);
-  padding: 10px;
+  color: white;
+  padding: 12px;
+  width: 100%;
+  max-width: 200px;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  margin-top: 10px;
   transition: background-color 0.3s ease;
   display: flex;
   align-items: center;
@@ -44,32 +65,48 @@ const Button = styled.button`
   &:hover {
     background-color: #2c3e50;
   }
+
+  &:focus {
+    outline: none;
+  }
 `;
 
 const ButtonIcon = styled.span`
-  margin-right: 5px;
+  margin-right: 8px;
 `;
 
 const Table = styled.table`
   width: 100%;
+  max-width: 600px;
+  margin-top: 20px;
   border-collapse: collapse;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 `;
 
 const Th = styled.th`
   background-color: var(--color-dark-blue);
-  color: var(--color-cream);
-  padding: 10px;
+  color: white;
+  padding: 12px;
   text-align: left;
+  font-family: 'Arial', sans-serif;
+  font-weight: bold;
 `;
 
 const Td = styled.td`
   border: 1px solid var(--color-dark-blue);
-  padding: 10px;
+  padding: 12px;
+  text-align: left;
+  font-family: 'Arial', sans-serif;
+  color: #333;
 `;
 
 const ActionButton = styled(Button)`
-  padding: 5px 10px;
+  padding: 8px 12px;
   margin-right: 5px;
+  width: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 `;
 
 type Cliente = {
@@ -94,10 +131,10 @@ const GestionClientes: React.FC = () => {
     try {
       const response = await axios.get('http://localhost:8080/clients', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}` // Si usas autenticación
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
-      setClientes(response.data.content); // Asumiendo que la API devuelve paginación con `content`
+      setClientes(response.data.content);
     } catch (error) {
       console.error('Error al obtener los clientes:', error);
     }
@@ -106,7 +143,6 @@ const GestionClientes: React.FC = () => {
   const onSubmit = async (data: Cliente) => {
     try {
       if (editingId) {
-        // Actualizar cliente
         await axios.put(`http://localhost:8080/clients/${editingId}`, data, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -115,7 +151,6 @@ const GestionClientes: React.FC = () => {
         setClientes(clientes.map(cliente => cliente.id === editingId ? { ...data, id: editingId } : cliente));
         setEditingId(null);
       } else {
-        // Crear nuevo cliente
         const response = await axios.post('http://localhost:8080/clients', data, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -145,24 +180,22 @@ const GestionClientes: React.FC = () => {
     }
   };
 
-
   return (
-    <Container>
-      <Title>Gestión de Clientes</Title>
-      <Form onSubmit={handleSubmit(onSubmit)}>
-        <Input {...register('name')} placeholder="Nombre" required />
-        <Input {...register('lastName')} placeholder="Apellido" required />
-        <Input {...register('email')} placeholder="Email" type="email" required />
-        <Input {...register('phone')} placeholder="Teléfono" required />
-        <Input {...register('dni')} placeholder="Documento de Identidad" required />
-        <Button type="submit">
-          <ButtonIcon>{editingId ? <FaEdit /> : <FaUserPlus />}</ButtonIcon>
-          {editingId ? 'Actualizar Cliente' : 'Agregar Cliente'}
-        </Button>
-      </Form>
-
-      <Table>
-        <thead>
+      <Container>
+        <Title>Gestión de Clientes</Title>
+        <Form onSubmit={handleSubmit(onSubmit)}>
+          <Input {...register('name')} placeholder="Nombre" required />
+          <Input {...register('lastName')} placeholder="Apellido" required />
+          <Input {...register('email')} placeholder="Email" type="email" required />
+          <Input {...register('phone')} placeholder="Teléfono" required />
+          <Input {...register('dni')} placeholder="Documento de Identidad" required />
+          <Button type="submit">
+            <ButtonIcon>{editingId ? <FaEdit /> : <FaUserPlus />}</ButtonIcon>
+            {editingId ? 'Actualizar Cliente' : 'Agregar Cliente'}
+          </Button>
+        </Form>
+        <Table>
+          <thead>
           <tr>
             <Th>Nombre</Th>
             <Th>Apellido</Th>
@@ -171,36 +204,38 @@ const GestionClientes: React.FC = () => {
             <Th>Documento</Th>
             <Th>Acciones</Th>
           </tr>
-        </thead>
-        <tbody>
+          </thead>
+          <tbody>
           {clientes.map((cliente) => (
-            <tr key={cliente.id}>
-              <Td>{cliente.name}</Td>
-              <Td>{cliente.lastName}</Td>
-              <Td>{cliente.email}</Td>
-              <Td>{cliente.phone}</Td>
-              <Td>{cliente.dni}</Td>
-              <Td>
-                <ActionButton onClick={() => {
-                  setEditingId(cliente.id);
-                  setValue('name', cliente.name);
-                  setValue('lastName', cliente.lastName);
-                  setValue('email', cliente.email);
-                  setValue('phone', cliente.phone);
-                  setValue('dni', cliente.dni);
-                }
-                }>
-                  <FaEdit />
-                </ActionButton>
-                <ActionButton onClick={() => eliminarCliente(cliente.id)}>
-                  <FaTrash />
-                </ActionButton>
-              </Td>
-            </tr>
+              <tr key={cliente.id}>
+                <Td>{cliente.name}</Td>
+                <Td>{cliente.lastName}</Td>
+                <Td>{cliente.email}</Td>
+                <Td>{cliente.phone}</Td>
+                <Td>{cliente.dni}</Td>
+                <Td>
+                  <ActionButton onClick={() => {
+                    setEditingId(cliente.id);
+                    setValue('name', cliente.name);
+                    setValue('lastName', cliente.lastName);
+                    setValue('email', cliente.email);
+                    setValue('phone', cliente.phone);
+                    setValue('dni', cliente.dni);
+                  }
+                  }>
+                    <FaEdit />
+                  </ActionButton>
+                  <ActionButton onClick={() => eliminarCliente(cliente.id)}>
+                    <FaTrash />
+                  </ActionButton>
+                </Td>
+              </tr>
           ))}
-        </tbody>
-      </Table>
-    </Container>
+          </tbody>
+        </Table>
+
+      </Container>
+
   );
 };
 

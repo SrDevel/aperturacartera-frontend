@@ -7,6 +7,9 @@ const Container = styled.div`
   max-width: 1000px;
   margin: 0 auto;
   padding: 20px;
+  background: #fbe5d1;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 `;
 
 const Title = styled.h1`
@@ -18,6 +21,8 @@ const Title = styled.h1`
 const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
+  border-radius: 8px; 
+  overflow: hidden;
 `;
 
 const Th = styled.th`
@@ -25,11 +30,23 @@ const Th = styled.th`
   color: var(--color-cream);
   padding: 10px;
   text-align: left;
+  font-weight: bold;
+  position: relative;
+
+  &:hover {
+    text-decoration: underline;
+  }
 `;
 
 const Td = styled.td`
   border: 1px solid var(--color-dark-blue);
   padding: 10px;
+  background-color: white; 
+  transition: background-color 0.3s;
+
+  &:hover {
+    background-color: #f1f1f1; 
+  }
 `;
 
 const Button = styled.button`
@@ -38,13 +55,15 @@ const Button = styled.button`
   border: none;
   padding: 5px 10px;
   margin-right: 5px;
-  border-radius: 3px;
+  border-radius: 5px; 
   cursor: pointer;
   display: inline-flex;
   align-items: center;
+  transition: background-color 0.3s;
 
   &:hover {
-    opacity: 0.8;
+    background-color: #0056b3;
+    opacity: 0.9; 
   }
 `;
 
@@ -75,7 +94,7 @@ const VisualizacionCreditos: React.FC = () => {
         //   }
         // });
         // setCreditos(response.data);
-        
+
         // Datos temporales
         setCreditos([
           { id: '1', clienteId: 'C001', monto: 5000, plazo: 12, tasaInteres: 5, estado: 'PENDIENTE' },
@@ -97,10 +116,10 @@ const VisualizacionCreditos: React.FC = () => {
       //     'Authorization': `Bearer ${localStorage.getItem('token')}`
       //   }
       // });
-      
+
       // Actualización temporal
-      setCreditos(creditos.map(credito => 
-        credito.id === id ? { ...credito, estado: 'APROBADO' } : credito
+      setCreditos(creditos.map(credito =>
+          credito.id === id ? { ...credito, estado: 'APROBADO' } : credito
       ));
     } catch (error) {
       console.error('Error al aprobar el crédito:', error);
@@ -115,10 +134,10 @@ const VisualizacionCreditos: React.FC = () => {
       //     'Authorization': `Bearer ${localStorage.getItem('token')}`
       //   }
       // });
-      
+
       // Actualización temporal
-      setCreditos(creditos.map(credito => 
-        credito.id === id ? { ...credito, estado: 'RECHAZADO' } : credito
+      setCreditos(creditos.map(credito =>
+          credito.id === id ? { ...credito, estado: 'RECHAZADO' } : credito
       ));
     } catch (error) {
       console.error('Error al rechazar el crédito:', error);
@@ -135,7 +154,7 @@ const VisualizacionCreditos: React.FC = () => {
       if (!creditoEditado) return;
 
       // TODO: Conexión con el backend
-      // await axios.put(`http://tu-api-backend/api/creditos/${id}`, creditoEditado, {
+        // await axios.put(`http://tu-api-backend/api/creditos/${id}`, creditoEditado, {
       //   headers: {
       //     'Authorization': `Bearer ${localStorage.getItem('token')}`
       //   }
@@ -149,15 +168,15 @@ const VisualizacionCreditos: React.FC = () => {
 
   const handleInputChange = (id: string, field: keyof Credito, value: string | number) => {
     setCreditos(creditos.map(credito =>
-      credito.id === id ? { ...credito, [field]: value } : credito
+        credito.id === id ? { ...credito, [field]: value } : credito
     ));
   };
 
   return (
-    <Container>
-      <Title>Visualización de Créditos</Title>
-      <Table>
-        <thead>
+      <Container>
+        <Title>Visualización de Créditos</Title>
+        <Table>
+          <thead>
           <tr>
             <Th>ID Cliente</Th>
             <Th>Monto</Th>
@@ -166,76 +185,79 @@ const VisualizacionCreditos: React.FC = () => {
             <Th>Estado</Th>
             <Th>Acciones</Th>
           </tr>
-        </thead>
-        <tbody>
+          </thead>
+          <tbody>
           {creditos.map((credito) => (
-            <tr key={credito.id}>
-              <Td>{credito.clienteId}</Td>
-              <Td>
-                {editingId === credito.id ? (
-                  <input
-                    type="number"
-                    value={credito.monto}
-                    onChange={(e) => handleInputChange(credito.id, 'monto', parseFloat(e.target.value))}
-                  />
-                ) : (
-                  `$${credito.monto.toFixed(2)}`
-                )}
-              </Td>
-              <Td>
-                {editingId === credito.id ? (
-                  <input
-                    type="number"
-                    value={credito.plazo}
-                    onChange={(e) => handleInputChange(credito.id, 'plazo', parseInt(e.target.value))}
-                  />
-                ) : (
-                  `${credito.plazo} meses`
-                )}
-              </Td>
-              <Td>
-                {editingId === credito.id ? (
-                  <input
-                    type="number"
-                    step="0.1"
-                    value={credito.tasaInteres}
-                    onChange={(e) => handleInputChange(credito.id, 'tasaInteres', parseFloat(e.target.value))}
-                  />
-                ) : (
-                  `${credito.tasaInteres}%`
-                )}
-              </Td>
-              <Td>{credito.estado}</Td>
-              <Td>
-                {credito.estado === 'PENDIENTE' && (
-                  <>
-                    <Button onClick={() => aprobarCredito(credito.id)}>
-                      <ButtonIcon><FaCheck /></ButtonIcon>
-                      Aprobar
-                    </Button>
-                    <Button onClick={() => rechazarCredito(credito.id)}>
-                      <ButtonIcon><FaTimes /></ButtonIcon>
-                      Rechazar
-                    </Button>
-                  </>
-                )}
-                {editingId === credito.id ? (
-                  <Button onClick={() => guardarEdicion(credito.id)}>
-                    <ButtonIcon><FaCheck /></ButtonIcon>
-                    Guardar
-                  </Button>
-                ) : (
-                  <Button onClick={() => editarCredito(credito.id)}>
-                    <ButtonIcon><FaEdit /></ButtonIcon>
-                    Editar
-                  </Button>
-                )}
-              </Td>
-            </tr>
+              <tr key={credito.id}>
+                <Td>{credito.clienteId}</Td>
+                <Td>
+                  {editingId === credito.id ? (
+                      <input
+                          type="number"
+                          value={credito.monto}
+                          onChange={(e) => handleInputChange(credito.id, 'monto', parseFloat(e.target.value))}
+                          style={{ width: '100%', border: 'none', outline: 'none', padding: '5px', borderRadius: '5px' }}
+                      />
+                  ) : (
+                      `$${credito.monto.toFixed(2)}`
+                  )}
+                </Td>
+                <Td>
+                  {editingId === credito.id ? (
+                      <input
+                          type="number"
+                          value={credito.plazo}
+                          onChange={(e) => handleInputChange(credito.id, 'plazo', parseInt(e.target.value))}
+                          style={{ width: '100%', border: 'none', outline: 'none', padding: '5px', borderRadius: '5px' }}
+                      />
+                  ) : (
+                      `${credito.plazo} meses`
+                  )}
+                </Td>
+                <Td>
+                  {editingId === credito.id ? (
+                      <input
+                          type="number"
+                          step="0.1"
+                          value={credito.tasaInteres}
+                          onChange={(e) => handleInputChange(credito.id, 'tasaInteres', parseFloat(e.target.value))}
+                          style={{ width: '100%', border: 'none', outline: 'none', padding: '5px', borderRadius: '5px' }}
+                      />
+                  ) : (
+                      `${credito.tasaInteres}%`
+                  )}
+                </Td>
+                <Td>{credito.estado}</Td>
+                <Td>
+                  {credito.estado === 'PENDIENTE' && (
+                      <>
+                        <Button onClick={() => aprobarCredito(credito.id)}>
+                          <ButtonIcon><FaCheck /></ButtonIcon>
+                          Aprobar
+                        </Button>
+                        <Button onClick={() => rechazarCredito(credito.id)}>
+                          <ButtonIcon><FaTimes /></ButtonIcon>
+                          Rechazar
+                        </Button>
+                      </>
+                  )}
+                  {editingId === credito.id ? (
+                      <Button onClick={() => guardarEdicion(credito.id)}>
+                        <ButtonIcon><FaCheck /></ButtonIcon>
+                        Guardar
+                      </Button>
+                  ) : (
+                      <Button onClick={() => editarCredito(credito.id)}>
+                        <ButtonIcon><FaEdit /></ButtonIcon>
+                        Editar
+                      </Button>
+                  )}
+                </Td>
+              </tr>
           ))}
-        </tbody>
-      </Table>
-    </Container>
+          </tbody>
+        </Table>
+      </Container>
   );
 };
 

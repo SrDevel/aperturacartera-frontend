@@ -4,20 +4,28 @@ import axios from 'axios';
 import styled from 'styled-components';
 
 const ProfileContainer = styled.div`
-  max-width: 600px;
+  max-width: 1200px; 
   margin: 0 auto;
   padding: 20px;
+  display: flex; 
+  justify-content: space-between; 
+  gap: 100px; 
 `;
 
 const Title = styled.h1`
   color: var(--color-dark-blue);
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 20px; 
 `;
 
 const Form = styled.form`
   display: flex;
   flex-direction: column;
+  background: #efe1ce;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  flex: 1;
 `;
 
 const Input = styled.input`
@@ -25,6 +33,7 @@ const Input = styled.input`
   padding: 10px;
   border: 1px solid var(--color-dark-blue);
   border-radius: 5px;
+  font-size: 1em; /* Aumentamos el tamaño de la fuente */
 `;
 
 const Button = styled.button`
@@ -36,6 +45,7 @@ const Button = styled.button`
   cursor: pointer;
   transition: background-color 0.3s ease;
   margin-top: 10px;
+  font-size: 1em; /* Aumentamos el tamaño de la fuente */
 
   &:hover {
     background-color: #2c3e50;
@@ -76,13 +86,13 @@ const PerfilUsuario: React.FC = () => {
         //   }
         // });
         // setProfile(response.data);
-        
+
         // Datos temporales
         const tempProfile = {
           id: '1',
           nombre: 'Juan Pérez',
           email: 'juan@example.com',
-          telefono: '1234567890'
+          telefono: '1234567890',
         };
         setProfile(tempProfile);
         setValue('nombre', tempProfile.nombre);
@@ -104,7 +114,7 @@ const PerfilUsuario: React.FC = () => {
       //     'Authorization': `Bearer ${localStorage.getItem('token')}`
       //   }
       // });
-      
+
       // Actualización temporal
       setProfile(data);
       alert('Perfil actualizado con éxito');
@@ -130,7 +140,7 @@ const PerfilUsuario: React.FC = () => {
       //     'Authorization': `Bearer ${localStorage.getItem('token')}`
       //   }
       // });
-      
+
       // Simulación de éxito
       alert('Contraseña actualizada con éxito');
     } catch (error) {
@@ -144,47 +154,51 @@ const PerfilUsuario: React.FC = () => {
   }
 
   return (
-    <ProfileContainer>
-      <Title>Perfil de Usuario</Title>
-      <Form onSubmit={handleSubmitProfile(onSubmitProfile)}>
-        <Input {...registerProfile('nombre')} placeholder="Nombre" />
-        <Input {...registerProfile('email')} placeholder="Email" type="email" />
-        <Input {...registerProfile('telefono')} placeholder="Teléfono" />
-        <Button type="submit">Actualizar Perfil</Button>
-      </Form>
+      <ProfileContainer>
+        <div>
+          <Title>Perfil de Usuario</Title>
+          <Form onSubmit={handleSubmitProfile(onSubmitProfile)}>
+            <Input {...registerProfile('nombre')} placeholder="Nombre" />
+            <Input {...registerProfile('email')} placeholder="Email" type="email" />
+            <Input {...registerProfile('telefono')} placeholder="Teléfono" />
+            <Button type="submit">Actualizar Perfil</Button>
+          </Form>
+        </div>
 
-      <Title>Cambiar Contraseña</Title>
-      <Form onSubmit={handleSubmitPassword(onSubmitPassword)}>
-        <Input 
-          {...registerPassword('currentPassword', { required: 'Este campo es requerido' })} 
-          type="password" 
-          placeholder="Contraseña Actual" 
-        />
-        {errors.currentPassword && <ErrorMessage>{errors.currentPassword.message}</ErrorMessage>}
+        <div>
+          <Title>Cambiar Contraseña</Title>
+          <Form onSubmit={handleSubmitPassword(onSubmitPassword)}>
+            <Input
+                {...registerPassword('currentPassword', { required: 'Este campo es requerido' })}
+                type="password"
+                placeholder="Contraseña Actual"
+            />
+            {errors.currentPassword && <ErrorMessage>{errors.currentPassword.message}</ErrorMessage>}
 
-        <Input 
-          {...registerPassword('newPassword', { 
-            required: 'Este campo es requerido',
-            minLength: { value: 8, message: 'La contraseña debe tener al menos 8 caracteres' }
-          })} 
-          type="password" 
-          placeholder="Nueva Contraseña" 
-        />
-        {errors.newPassword && <ErrorMessage>{errors.newPassword.message}</ErrorMessage>}
+            <Input
+                {...registerPassword('newPassword', {
+                  required: 'Este campo es requerido',
+                  minLength: { value: 8, message: 'La contraseña debe tener al menos 8 caracteres' }
+                })}
+                type="password"
+                placeholder="Nueva Contraseña"
+            />
+            {errors.newPassword && <ErrorMessage>{errors.newPassword.message}</ErrorMessage>}
 
-        <Input 
-          {...registerPassword('confirmNewPassword', { 
-            required: 'Este campo es requerido',
-            validate: (value, formValues) => value === formValues.newPassword || 'Las contraseñas no coinciden'
-          })} 
-          type="password" 
-          placeholder="Confirmar Nueva Contraseña" 
-        />
-        {errors.confirmNewPassword && <ErrorMessage>{errors.confirmNewPassword.message}</ErrorMessage>}
+            <Input
+                {...registerPassword('confirmNewPassword', {
+                  required: 'Este campo es requerido',
+                  validate: (value, formValues) => value === formValues.newPassword || 'Las contraseñas no coinciden'
+                })}
+                type="password"
+                placeholder="Confirmar Nueva Contraseña"
+            />
+            {errors.confirmNewPassword && <ErrorMessage>{errors.confirmNewPassword.message}</ErrorMessage>}
 
-        <Button type="submit">Cambiar Contraseña</Button>
-      </Form>
-    </ProfileContainer>
+            <Button type="submit">Cambiar Contraseña</Button>
+          </Form>
+        </div>
+      </ProfileContainer>
   );
 };
 
