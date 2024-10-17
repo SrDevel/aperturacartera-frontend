@@ -14,17 +14,15 @@ const Login: React.FC = () => {
 
   const onSubmit = async (data: LoginForm) => {
     try {
-      // TODO: Conexión con el backend
-      // Descomentar y ajustar la URL cuando el backend esté listo
-      // const response = await axios.post('http://tu-api-backend/api/login', data);
-      // if (response.data.token) {
-      //   localStorage.setItem('token', response.data.token);
-      //   navigate('/');
-      // }
+      const response = await axios.post('http://localhost:8080/auth/login', data);
+      if (response.data.token) {
+        console.log('Inicio de sesión exitoso:', response.data.token);
+        localStorage.setItem('token', response.data.token);
+        navigate('/');
+      } else {
+        console.error('Inicio de sesión fallido:', response.data);
+      }
       
-      // Código temporal para simular el inicio de sesión
-      localStorage.setItem('token', "123445");
-      navigate('/');
     } catch (error) {
       console.error('Error de inicio de sesión:', error);
     }

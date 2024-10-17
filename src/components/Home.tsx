@@ -50,13 +50,9 @@ const Home: React.FC = () => {
     <HomeContainer>
       <Title>Bienvenido a la Gestión de Cartera</Title>
       <CardContainer>
-        <Card to="/agregar-cliente">
+        <Card to="/gestion-clientes">
           <CardIcon><FaUserPlus /></CardIcon>
-          <CardTitle>Agregar Cliente</CardTitle>
-        </Card>
-        <Card to="/apertura-cartera">
-          <CardIcon><FaFileInvoiceDollar /></CardIcon>
-          <CardTitle>Apertura de Cartera</CardTitle>
+          <CardTitle>Gestión de Clientes</CardTitle>
         </Card>
         <Card to="/registro-credito">
           <CardIcon><FaFileInvoiceDollar /></CardIcon>
