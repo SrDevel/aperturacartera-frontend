@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import styled from 'styled-components';
+import axios from 'axios';
 
 const Container = styled.div`
   margin: 100px auto;
@@ -21,7 +22,22 @@ const Title = styled.h1`
 const Form = styled.form`
   display: flex;
   flex-direction: column;
-  padding: 0; 
+  padding: 0;
+`;
+
+const Select = styled.select`
+  margin-bottom: 20px;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+
+  &:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
+    outline: none;
+  }
 `;
 
 const Input = styled.input`
@@ -68,18 +84,55 @@ const Button = styled.button`
 `;
 
 type RegistroCreditoForm = {
-  clienteId: string;
-  monto: number;
-  plazo: number;
-  tasaInteres: number;
+  clienteId: number;
+  amount: number;
+  interestRate: number;
+  term: number;
+  fees: number;
+};
+
+type Cliente = {
+  id: string;
+  name: string;
+  userName: string;
+  dni: string;
 };
 
 const RegistroCredito: React.FC = () => {
   const { register, handleSubmit, formState: { errors } } = useForm<RegistroCreditoForm>();
+  const [clientes, setClientes] = useState<Cliente[]>([]);
+
+  useEffect(() => {
+    const fetchClientes = async () => {
+      try {
+        const response = await axios.get('/clients', {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        if (response.data && Array.isArray(response.data.content)) {
+          setClientes(response.data.content);
+        } else {
+          console.error('La respuesta de la API no contiene un array válido:', response.data);
+          setClientes([]);
+        }
+      } catch (error) {
+        console.error('Error al obtener los clientes:', error);
+        setClientes([]);
+      }
+    };
+
+    fetchClientes();
+  }, []);
 
   const onSubmit = async (data: RegistroCreditoForm) => {
     try {
-      // TODO: Conexión con el backend
+      const response = await axios.post('/credits', data, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      setClientes([...clientes, response.data]);
       console.log('Datos de registro de crédito:', data);
     } catch (error) {
       console.error('Error en el registro de crédito:', error);
@@ -87,40 +140,50 @@ const RegistroCredito: React.FC = () => {
   };
 
   return (
-      <Container>
-        <Title>Registro de Crédito</Title>
-        <Form onSubmit={handleSubmit(onSubmit)}>
-          <Input
-              {...register('clienteId', { required: 'Este campo es requerido' })}
-              placeholder="ID del Cliente"
-          />
-          {errors.clienteId && <ErrorMessage>{errors.clienteId.message}</ErrorMessage>}
+    <Container>
+      <Title>Registro de Crédito</Title>
+      <Form onSubmit={handleSubmit(onSubmit)}>
+        <Select {...register('clienteId', { required: 'Este campo es requerido' })}>
+          <option value="">Seleccione un cliente</option>
+          {clientes.map(cliente => (
+            <option key={cliente.id} value={cliente.id}>
+              {cliente.name} {cliente.userName} - {cliente.dni}
+            </option>
+          ))}
+        </Select>
+        {errors.clienteId && <ErrorMessage>{errors.clienteId.message}</ErrorMessage>}
 
-          <Input
-              type="number"
-              {...register('monto', { required: 'Este campo es requerido', min: { value: 0, message: 'El monto debe ser mayor o igual a 0' } })}
-              placeholder="Monto"
-          />
-          {errors.monto && <ErrorMessage>{errors.monto.message}</ErrorMessage>}
+        <Input
+          type="number"
+          {...register('amount', { required: 'Este campo es requerido', min: { value: 0, message: 'El monto debe ser mayor a 0' } })}
+          placeholder="Monto"
+        />
+        {errors.amount && <ErrorMessage>{errors.amount.message}</ErrorMessage>}
 
-          <Input
-              type="number"
-              {...register('plazo', { required: 'Este campo es requerido', min: { value: 1, message: 'El plazo debe ser mayor o igual a 1 mes' } })}
-              placeholder="Plazo (en meses)"
-          />
-          {errors.plazo && <ErrorMessage>{errors.plazo.message}</ErrorMessage>}
+        <Input
+          type="number"
+          {...register('interestRate', { required: 'Este campo es requerido', min: { value: 0, message: 'La tasa debe ser mayor a 0' }, max: { value: 100, message: 'La tasa no puede ser mayor a 100%' } })}
+          placeholder="Tasa de Interés (%)"
+        />
+        {errors.interestRate && <ErrorMessage>{errors.interestRate.message}</ErrorMessage>}
 
-          <Input
-              type="number"
-              step="0.01"
-              {...register('tasaInteres', { required: 'Este campo es requerido', min: { value: 0, message: 'La tasa debe ser mayor o igual a 0' }, max: { value: 100, message: 'La tasa no puede ser mayor a 100%' } })}
-              placeholder="Tasa de Interés (%)"
-          />
-          {errors.tasaInteres && <ErrorMessage>{errors.tasaInteres.message}</ErrorMessage>}
+        <Input
+          type="number"
+          {...register('term', { required: 'Este campo es requerido', min: { value: 1, message: 'El plazo debe ser mayor a 1 mes' } })}
+          placeholder="Plazo (en meses)"
+        />
+        {errors.term && <ErrorMessage>{errors.term.message}</ErrorMessage>}
 
-          <Button type="submit">Registrar Crédito</Button>
-        </Form>
-      </Container>
+        <Input
+          type="number"
+          {...register('fees', { required: 'Este campo es requerido', min: { value: 0, message: 'Las cuotas deben ser mayor a 0' } })}
+          placeholder="Cuotas"
+        />
+        {errors.fees && <ErrorMessage>{errors.fees.message}</ErrorMessage>}
+
+        <Button type="submit">Registrar Crédito</Button>
+      </Form>
+    </Container>
   );
 };
 

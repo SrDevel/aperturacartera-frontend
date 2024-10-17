@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import styled from 'styled-components';
 import { FaEdit, FaCheck, FaTimes } from 'react-icons/fa';
+import useAxios from '../lib/useAxios';
 
 const Container = styled.div`
   max-width: 1000px;
@@ -73,33 +73,27 @@ const ButtonIcon = styled.span`
 
 type Credito = {
   id: string;
-  clienteId: string;
-  monto: number;
-  plazo: number;
-  tasaInteres: number;
-  estado: 'PENDIENTE' | 'APROBADO' | 'RECHAZADO';
+  clientId: string;
+  amount: number;
+  term: number;
+  interestRate: number;
+  status: 'Pendiente' | 'Aprobado' | 'Rechazado' | 'Cancelado' | 'Pagado';
 };
 
 const VisualizacionCreditos: React.FC = () => {
   const [creditos, setCreditos] = useState<Credito[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const axiosInstance = useAxios();
 
   useEffect(() => {
     const fetchCreditos = async () => {
       try {
-        // TODO: Conexión con el backend
-        // const response = await axios.get('http://tu-api-backend/api/creditos', {
-        //   headers: {
-        //     'Authorization': `Bearer ${localStorage.getItem('token')}`
-        //   }
-        // });
-        // setCreditos(response.data);
-
-        // Datos temporales
-        setCreditos([
-          { id: '1', clienteId: 'C001', monto: 5000, plazo: 12, tasaInteres: 5, estado: 'PENDIENTE' },
-          { id: '2', clienteId: 'C002', monto: 10000, plazo: 24, tasaInteres: 4.5, estado: 'APROBADO' },
-        ]);
+        const response = await axiosInstance.get('/credits', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        setCreditos(response.data.content); // `response.data.content` si está paginado
       } catch (error) {
         console.error('Error al obtener los créditos:', error);
       }
@@ -110,39 +104,42 @@ const VisualizacionCreditos: React.FC = () => {
 
   const aprobarCredito = async (id: string) => {
     try {
-      // TODO: Conexión con el backend
-      // await axios.put(`http://tu-api-backend/api/creditos/${id}/aprobar`, {}, {
-      //   headers: {
-      //     'Authorization': `Bearer ${localStorage.getItem('token')}`
-      //   }
-      // });
-
-      // Actualización temporal
+      await axiosInstance.patch(`/credits/${id}/status?status=Aprobado`, 
+        {}, // El cuerpo vacío
+        {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        }
+      );
+  
       setCreditos(creditos.map(credito =>
-          credito.id === id ? { ...credito, estado: 'APROBADO' } : credito
+        credito.id === id ? { ...credito, status: 'Aprobado' } : credito
       ));
     } catch (error) {
       console.error('Error al aprobar el crédito:', error);
     }
   };
-
+  
   const rechazarCredito = async (id: string) => {
     try {
-      // TODO: Conexión con el backend
-      // await axios.put(`http://tu-api-backend/api/creditos/${id}/rechazar`, {}, {
-      //   headers: {
-      //     'Authorization': `Bearer ${localStorage.getItem('token')}`
-      //   }
-      // });
-
-      // Actualización temporal
+      await axiosInstance.patch(`/credits/${id}/status?status=Rechazado`, 
+        {}, // El cuerpo vacío
+        {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        }
+      );
+  
       setCreditos(creditos.map(credito =>
-          credito.id === id ? { ...credito, estado: 'RECHAZADO' } : credito
+        credito.id === id ? { ...credito, status: 'Rechazado' } : credito
       ));
     } catch (error) {
       console.error('Error al rechazar el crédito:', error);
     }
   };
+  
 
   const editarCredito = (id: string) => {
     setEditingId(id);
@@ -153,12 +150,11 @@ const VisualizacionCreditos: React.FC = () => {
       const creditoEditado = creditos.find(c => c.id === id);
       if (!creditoEditado) return;
 
-      // TODO: Conexión con el backend
-        // await axios.put(`http://tu-api-backend/api/creditos/${id}`, creditoEditado, {
-      //   headers: {
-      //     'Authorization': `Bearer ${localStorage.getItem('token')}`
-      //   }
-      // });
+      await axiosInstance.put(`/credits/${id}`, creditoEditado, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
 
       setEditingId(null);
     } catch (error) {
@@ -168,15 +164,15 @@ const VisualizacionCreditos: React.FC = () => {
 
   const handleInputChange = (id: string, field: keyof Credito, value: string | number) => {
     setCreditos(creditos.map(credito =>
-        credito.id === id ? { ...credito, [field]: value } : credito
+      credito.id === id ? { ...credito, [field]: value } : credito
     ));
   };
 
   return (
-      <Container>
-        <Title>Visualización de Créditos</Title>
-        <Table>
-          <thead>
+    <Container>
+      <Title>Visualización de Créditos</Title>
+      <Table>
+        <thead>
           <tr>
             <Th>ID Cliente</Th>
             <Th>Monto</Th>
@@ -185,79 +181,79 @@ const VisualizacionCreditos: React.FC = () => {
             <Th>Estado</Th>
             <Th>Acciones</Th>
           </tr>
-          </thead>
-          <tbody>
+        </thead>
+        <tbody>
           {creditos.map((credito) => (
-              <tr key={credito.id}>
-                <Td>{credito.clienteId}</Td>
-                <Td>
-                  {editingId === credito.id ? (
-                      <input
-                          type="number"
-                          value={credito.monto}
-                          onChange={(e) => handleInputChange(credito.id, 'monto', parseFloat(e.target.value))}
-                          style={{ width: '100%', border: 'none', outline: 'none', padding: '5px', borderRadius: '5px' }}
-                      />
-                  ) : (
-                      `$${credito.monto.toFixed(2)}`
-                  )}
-                </Td>
-                <Td>
-                  {editingId === credito.id ? (
-                      <input
-                          type="number"
-                          value={credito.plazo}
-                          onChange={(e) => handleInputChange(credito.id, 'plazo', parseInt(e.target.value))}
-                          style={{ width: '100%', border: 'none', outline: 'none', padding: '5px', borderRadius: '5px' }}
-                      />
-                  ) : (
-                      `${credito.plazo} meses`
-                  )}
-                </Td>
-                <Td>
-                  {editingId === credito.id ? (
-                      <input
-                          type="number"
-                          step="0.1"
-                          value={credito.tasaInteres}
-                          onChange={(e) => handleInputChange(credito.id, 'tasaInteres', parseFloat(e.target.value))}
-                          style={{ width: '100%', border: 'none', outline: 'none', padding: '5px', borderRadius: '5px' }}
-                      />
-                  ) : (
-                      `${credito.tasaInteres}%`
-                  )}
-                </Td>
-                <Td>{credito.estado}</Td>
-                <Td>
-                  {credito.estado === 'PENDIENTE' && (
-                      <>
-                        <Button onClick={() => aprobarCredito(credito.id)}>
-                          <ButtonIcon><FaCheck /></ButtonIcon>
-                          Aprobar
-                        </Button>
-                        <Button onClick={() => rechazarCredito(credito.id)}>
-                          <ButtonIcon><FaTimes /></ButtonIcon>
-                          Rechazar
-                        </Button>
-                      </>
-                  )}
-                  {editingId === credito.id ? (
-                      <Button onClick={() => guardarEdicion(credito.id)}>
-                        <ButtonIcon><FaCheck /></ButtonIcon>
-                        Guardar
-                      </Button>
-                  ) : (
-                      <Button onClick={() => editarCredito(credito.id)}>
-                        <ButtonIcon><FaEdit /></ButtonIcon>
-                        Editar
-                      </Button>
-                  )}
-                </Td>
-              </tr>
+            <tr key={credito.id}>
+              <Td>{credito.clientId}</Td>
+              <Td>
+                {editingId === credito.id ? (
+                  <input
+                    type="number"
+                    value={credito.amount}
+                    onChange={(e) => handleInputChange(credito.id, 'amount', parseFloat(e.target.value))}
+                    style={{ width: '100%', border: 'none', outline: 'none', padding: '5px', borderRadius: '5px' }}
+                  />
+                ) : (
+                  `$${credito.amount.toFixed(2)}`
+                )}
+              </Td>
+              <Td>
+                {editingId === credito.id ? (
+                  <input
+                    type="number"
+                    value={credito.term}
+                    onChange={(e) => handleInputChange(credito.id, 'term', parseInt(e.target.value))}
+                    style={{ width: '100%', border: 'none', outline: 'none', padding: '5px', borderRadius: '5px' }}
+                  />
+                ) : (
+                  `${credito.term} meses`
+                )}
+              </Td>
+              <Td>
+                {editingId === credito.id ? (
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={credito.interestRate}
+                    onChange={(e) => handleInputChange(credito.id, 'interestRate', parseFloat(e.target.value))}
+                    style={{ width: '100%', border: 'none', outline: 'none', padding: '5px', borderRadius: '5px' }}
+                  />
+                ) : (
+                  `${credito.interestRate}%`
+                )}
+              </Td>
+              <Td>{credito.status}</Td>
+              <Td>
+                {credito.status === 'Pendiente' && (
+                  <>
+                    <Button onClick={() => aprobarCredito(credito.id)}>
+                      <ButtonIcon><FaCheck /></ButtonIcon>
+                      Aprobar
+                    </Button>
+                    <Button onClick={() => rechazarCredito(credito.id)}>
+                      <ButtonIcon><FaTimes /></ButtonIcon>
+                      Rechazar
+                    </Button>
+                  </>
+                )}
+                {editingId === credito.id ? (
+                  <Button onClick={() => guardarEdicion(credito.id)}>
+                    <ButtonIcon><FaCheck /></ButtonIcon>
+                    Guardar
+                  </Button>
+                ) : (
+                  <Button onClick={() => editarCredito(credito.id)}>
+                    <ButtonIcon><FaEdit /></ButtonIcon>
+                    Editar
+                  </Button>
+                )}
+              </Td>
+            </tr>
           ))}
-          </tbody>
-        </Table>
-      </Container>
+        </tbody>
+      </Table>
+    </Container>
   );
 };
 

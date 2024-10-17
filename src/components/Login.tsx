@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
+import useAxios from '../lib/useAxios';
 
 type LoginForm = {
   username: string;
@@ -10,45 +11,49 @@ type LoginForm = {
 const Login: React.FC = () => {
   const { register, handleSubmit, formState: { errors } } = useForm<LoginForm>();
   const navigate = useNavigate();
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const axiosInstance = useAxios(); // Usar la instancia de Axios personalizada
 
-  const onSubmit = async () => {
+  const onSubmit = async (data: LoginForm) => {
     try {
-      // TODO: Conexión con el backend
-      // Descomentar y ajustar la URL cuando el backend esté listo
-      // const response = await axios.post('http://api-backend/api/login', data);
-      // if (response.data.token) {
-      //   localStorage.setItem('token', response.data.token);
-      //   navigate('/');
-      // }
-
-      // Código temporal para simular el inicio de sesión
-      localStorage.setItem('token', "123445");
-      navigate('/');
+      const response = await axiosInstance.post('/auth/login', data);
+      if (response.data.token) {
+        console.log('Inicio de sesión exitoso:', response.data.token);
+        localStorage.setItem('token', response.data.token);
+        navigate('/');
+      } else {
+        console.error('Inicio de sesión fallido:', response.data);
+        setErrorMessage('Inicio de sesión fallido. Por favor, verifica tus credenciales.');
+      }
     } catch (error) {
       console.error('Error de inicio de sesión:', error);
+      setErrorMessage('Error de inicio de sesión. Por favor, intenta nuevamente.');
     }
   };
 
   return (
-      <div>
-        <h1 >Iniciar Sesión</h1>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <input
-              {...register('username', { required: 'Este campo es requerido' })}
-              placeholder="Usuario"
-          />
-          {errors.username && <span>{errors.username.message}</span>}
+    <div className="login-container">
+      <h1>Iniciar Sesión</h1>
+      <form onSubmit={handleSubmit(onSubmit)} className="login-form">
+        <input
+          {...register('username', { required: 'Este campo es requerido' })}
+          placeholder="Usuario"
+          className="login-input"
+        />
+        {errors.username && <span className="error-message">{errors.username.message}</span>}
 
-          <input
-              type="password"
-              {...register('password', { required: 'Este campo es requerido' })}
-              placeholder="Contraseña"
-          />
-          {errors.password && <span>{errors.password.message}</span>}
+        <input
+          type="password"
+          {...register('password', { required: 'Este campo es requerido' })}
+          placeholder="Contraseña"
+          className="login-input"
+        />
+        {errors.password && <span className="error-message">{errors.password.message}</span>}
 
-          <button type="submit">Iniciar Sesión</button>
-        </form>
-      </div>
+        <button type="submit" className="login-button">Iniciar Sesión</button>
+      </form>
+      {errorMessage && <div className="error-message">{errorMessage}</div>}
+    </div>
   );
 };
 

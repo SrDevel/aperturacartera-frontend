@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import axios from 'axios';
 import styled from 'styled-components';
 import { FaEdit, FaTrash, FaUserPlus } from 'react-icons/fa';
+import useAxios from '../lib/useAxios';
 
 const Container = styled.div`
   max-width: 600px;
@@ -122,6 +122,7 @@ const GestionClientes: React.FC = () => {
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const { register, handleSubmit, reset, setValue } = useForm<Cliente>();
+  const axiosInstance = useAxios();
 
   useEffect(() => {
     fetchClientes();
@@ -129,7 +130,7 @@ const GestionClientes: React.FC = () => {
 
   const fetchClientes = async () => {
     try {
-      const response = await axios.get('http://localhost:8080/clients', {
+      const response = await axiosInstance.get('/clients', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -143,7 +144,7 @@ const GestionClientes: React.FC = () => {
   const onSubmit = async (data: Cliente) => {
     try {
       if (editingId) {
-        await axios.put(`http://localhost:8080/clients/${editingId}`, data, {
+        await axiosInstance.put(`/clients/${editingId}`, data, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
@@ -151,7 +152,7 @@ const GestionClientes: React.FC = () => {
         setClientes(clientes.map(cliente => cliente.id === editingId ? { ...data, id: editingId } : cliente));
         setEditingId(null);
       } else {
-        const response = await axios.post('http://localhost:8080/clients', data, {
+        const response = await axiosInstance.post('/clients', data, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
@@ -168,7 +169,7 @@ const GestionClientes: React.FC = () => {
   const eliminarCliente = async (id: string) => {
     if (window.confirm('¿Está seguro de que desea eliminar este cliente?')) {
       try {
-        await axios.delete(`http://localhost:8080/clients/${id}`, {
+        await axiosInstance.delete(`/clients/${id}`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }

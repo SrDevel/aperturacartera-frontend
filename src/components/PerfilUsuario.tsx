@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import axios from 'axios';
 import styled from 'styled-components';
+import useAxios from '../lib/useAxios';
 
 const ProfileContainer = styled.div`
   max-width: 1200px; 
@@ -60,9 +60,7 @@ const ErrorMessage = styled.span`
 
 type UserProfile = {
   id: string;
-  nombre: string;
-  email: string;
-  telefono: string;
+  username: string;
 };
 
 type PasswordChange = {
@@ -75,29 +73,18 @@ const PerfilUsuario: React.FC = () => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const { register: registerProfile, handleSubmit: handleSubmitProfile, setValue } = useForm<UserProfile>();
   const { register: registerPassword, handleSubmit: handleSubmitPassword, formState: { errors } } = useForm<PasswordChange>();
+  const axiosInstance = useAxios();
 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
         // TODO: Conexión con el backend
-        // const response = await axios.get('http://tu-api-backend/api/perfil', {
-        //   headers: {
-        //     'Authorization': `Bearer ${localStorage.getItem('token')}`
-        //   }
-        // });
-        // setProfile(response.data);
-
-        // Datos temporales
-        const tempProfile = {
-          id: '1',
-          nombre: 'Juan Pérez',
-          email: 'juan@example.com',
-          telefono: '1234567890',
-        };
-        setProfile(tempProfile);
-        setValue('nombre', tempProfile.nombre);
-        setValue('email', tempProfile.email);
-        setValue('telefono', tempProfile.telefono);
+        const response = await axiosInstance.get('/auth/current', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        setProfile(response.data);
       } catch (error) {
         console.error('Error al obtener el perfil:', error);
       }
@@ -158,9 +145,7 @@ const PerfilUsuario: React.FC = () => {
         <div>
           <Title>Perfil de Usuario</Title>
           <Form onSubmit={handleSubmitProfile(onSubmitProfile)}>
-            <Input {...registerProfile('nombre')} placeholder="Nombre" />
-            <Input {...registerProfile('email')} placeholder="Email" type="email" />
-            <Input {...registerProfile('telefono')} placeholder="Teléfono" />
+            <Input {...registerProfile('username')} placeholder="Nombre" />
             <Button type="submit">Actualizar Perfil</Button>
           </Form>
         </div>

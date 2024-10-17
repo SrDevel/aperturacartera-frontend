@@ -75,7 +75,7 @@ const Home: React.FC = () => {
             <CardIcon><FaInfoCircle /></CardIcon>
             <CardTitle>Información General</CardTitle>
           </Card>
-          <Card to="/perfil-usuario">
+          <Card to="/usuario">
             <CardIcon><FaUser /></CardIcon>
             <CardTitle>Perfil de Usuario</CardTitle>
           </Card>

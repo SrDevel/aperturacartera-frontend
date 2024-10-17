@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import styled from 'styled-components';
 import { FaDownload } from 'react-icons/fa';
+import useAxios from '../lib/useAxios';
 
 const InfoContainer = styled.div`
   max-width: 800px;
@@ -85,6 +85,7 @@ type InformacionGeneral = {
 
 const InformacionGeneral: React.FC = () => {
   const [informacion, setInformacion] = useState<InformacionGeneral | null>(null);
+  const axiosInstance = useAxios();
 
   useEffect(() => {
     const fetchInformacion = async () => {

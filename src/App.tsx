@@ -19,7 +19,7 @@ const App: React.FC = () => {
         <Route path="/registro-credito" element={<ProtectedRoute><RegistroCredito /></ProtectedRoute>} />
         <Route path="/visualizacion-creditos" element={<ProtectedRoute><VisualizacionCreditos /></ProtectedRoute>} />
         <Route path="/informacion-general" element={<ProtectedRoute><InformacionGeneral /></ProtectedRoute>} />
-        <Route path="/perfil-usuario" element={<ProtectedRoute><PerfilUsuario /></ProtectedRoute>} />
+        <Route path="/usuario" element={<ProtectedRoute><PerfilUsuario /></ProtectedRoute>} />
       </Routes>
     </Router>
   );
